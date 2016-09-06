@@ -1,0 +1,4 @@
+*-compiled*
+*.log
+node_modules
+.idea
