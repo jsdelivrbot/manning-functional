@@ -17,10 +17,11 @@ const R = require('ramda');
 const Person = require('../model/Person.js').Person;
 const Address = require('../model/Address.js').Address;
 
-var p1 = new Person('111-11-1111', 'Haskell', 'Curry', 1900, new Address('US'));	
-var p2 = new Person('222-22-2222', 'Barkley', 'Rosser', 1907, new Address('Greece'));
-var p3 = new Person('333-33-3333', 'John', 'von Neumann', 1903, new Address('Hungary'));
-var p4 = new Person('444-44-4444', 'Alonzo', 'Church', 1903, new Address('US'));
+// constructor(country, state = null, city = null, zip = null, street = null) {
+var p1 = new Person('111-11-1111', 'Haskell', 'Curry', 1900, new Address('US', null, 'New York'));	
+var p2 = new Person('222-22-2222', 'Barkley', 'Rosser', 1907, new Address('Greece', null, 'Athens'));
+var p3 = new Person('333-33-3333', 'John', 'von Neumann', 1903, new Address('Hungary', null, 'Budapest'));
+var p4 = new Person('444-44-4444', 'Alonzo', 'Church', 1903, new Address('US', null, 'New York'));
 
 var persons = [p1, p2, p3, p4];
 
@@ -47,6 +48,7 @@ QUnit.test("Combining map and reduce", function () {
 		return stat;
 	};
 	let result = _(persons).map(getCountry).reduce(gatherStats, {});
+	console.log(result);
 	assert.deepEqual(result, { US: 2, Greece: 1, Hungary: 1 });		
 });
 
@@ -60,8 +62,10 @@ QUnit.test("Combining map and reduce with lenses", function () {
 		return stat;
 	};
 	
-	let result = _(persons).map(R.view(cityLens)).reduce(gatherStats, {});	
-	assert.deepEqual(result, { null: 4 });	// TODO	
+	let result = _(persons).map(R.view(cityLens)).reduce(gatherStats, {});
+	console.log(result);	
+	//assert.deepEqual(result, { null: 4 });	// TODO	
+	assert.deepEqual(result, { 'New York': 2, 'Athens': 1, 'Budapest': 1 });	
 });  
 
 QUnit.test("Valid or not valid", function () {
@@ -80,6 +84,7 @@ QUnit.test("Introducing filter", function () {
 	const isValid = val => !_.isUndefined(val) && !_.isNull(val);
 	const fullname = person => person.fullname;
 	let result = _([p1, p2, p3, null]).filter(isValid).map(fullname).value();
+	console.log(result);
 	assert.equal(result.length, 3);
 });  
 
@@ -93,13 +98,19 @@ QUnit.test("People born in 1903", function () {
 
 QUnit.test("Array processing with Lodash", function () {
 	let names = ['alonzo church', 'Haskell curry', 'stephen_kleene',
-				 'John Von Neumann', 'stephen_kleene'];
+				 'John Von Neumann', 'stephen_kleene', null, undefined];
 	
 	const isValid = val => !_.isUndefined(val) && !_.isNull(val);
 
-	var result = _.chain(names).filter(isValid).map(s => s.replace(/_/, ' '))
-		.uniq().map(_.startCase).sort().value();
+	var result = _.chain(names)
+									.filter(isValid)
+									.map(s => s.replace(/_/, ' '))
+									.uniq()
+									.map(_.startCase)
+									.sort()
+									.value();
 	
+	//console.log(result);
 	assert.deepEqual(result, ['Alonzo Church', 'Haskell Curry', 'John Von Neumann', 'Stephen Kleene']);			 
 });  
 
@@ -116,7 +127,7 @@ QUnit.test("Gather stats", function () {
 	const getCountry = person => person.address.country;	
 	let result = _(persons).map(getCountry).reduce(gatherStats, {});
 	assert.deepEqual(result, 
-		{ US:      { name: 'US', count: 2 },
+			{ US:      { name: 'US', count: 2 },
   		  Greece:  { name: 'Greece', count: 1 },
   		  Hungary: { name: 'Hungary', count: 1 } 
   		}
@@ -146,7 +157,8 @@ QUnit.test("Lazy function chains", function () {
 	};
 	const isValid = val => !_.isUndefined(val) && !_.isNull(val);	
 
-	let result = _.chain(persons)
+	let result = 
+	_.chain(persons)
 		.filter(isValid)
 		.map(_.property('address.country'))
 		.reduce(gatherStats, {})
@@ -212,6 +224,10 @@ QUnit.test("Tree navigation", function () {
 
 	// Use Tree structure to apply a map operation over all nodes
 	let newTree = Tree.map(church, p => p.fullname);
+
+	//console.log((newTree));
+
+	console.log(newTree.toArray());
 	assert.deepEqual(newTree.toArray(), ['Alonzo Church', 'Barkley Rosser', 'Elliot Mendelson', 
 		'Gerald Sacks', 'Alan Turing', 'Robert Gandy', 'Stephen Kleene', 'Nels Nelson', 'Robert Constable']);	
 });

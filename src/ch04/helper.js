@@ -19,7 +19,11 @@ module.exports = {
 };
 
 const Tuple = function( /* types */ ) {
+	//console.log('arguments:');
+	//console.log(arguments);
 	const typeInfo = Array.prototype.slice.call(arguments, 0);
+	//console.log('typeInfo:');
+	//console.log(typeInfo);
 	const _T = function( /* values */ ) {
 		const values = Array.prototype.slice.call(arguments, 0);
 		if(values.some(val => val === null || val === undefined)) {

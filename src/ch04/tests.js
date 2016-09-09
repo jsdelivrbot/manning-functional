@@ -1,6 +1,11 @@
 /**
   * Chapter 4 code listings
   * Author: Luis Atencio
+
+
+	TO RUN:
+	node 'C:\Sandpit\functional-programming-js\node_modules\qunit\bin\cli.js' -t 'src\ch04\tests.js' -c 'src\ch04\tests.js'
+
   */
 "use strict";
 
@@ -10,9 +15,13 @@ const _ = require('lodash');
 const R = require('ramda');
 
 // Globally used functions throughout all code listings
+// isEmpty :: String -> String
 const isEmpty = s => !s || !s.trim();
+// isValid :: Object -> Boolean
 const isValid = val => !_.isUndefined(val) && !_.isNull(val);
+// trim :: String -> String
 const trim = (str) => str.replace(/^\s*|\s*$/g, '');
+// normalize :: String -> String
 const normalize = (str) => str.replace(/\-/g, '');
 
 QUnit.test("Chaining methods together", function () {
@@ -51,12 +60,15 @@ QUnit.test("Tuple test", function () {
 	const StringPair = Tuple(String, String);
 	const name = new StringPair('Barkley', 'Rosser');
 	let [first, last] = name.values();  // In Node you need to use let
+	console.log(name);
+	console.log(name.values());
 	assert.equal(first, 'Barkley');
 	assert.equal(last, 'Rosser');
 	assert.throws(() => {
 		const fullname = new StringPair('J', 'Barkley', 'Rosser');	
 	}, TypeError);	
 });
+
 
 QUnit.test("Extending the core language", function () {
 
@@ -82,11 +94,20 @@ QUnit.test("Extending the core language", function () {
 
 
 QUnit.test("Compsition", function () {
-	const str = `We can only see a short distance ahead but we can see plenty there that needs to be done`;
-	const explode = (str) => str.split(/\s+/);
-	const count = (arr) => arr.length;
+	// const str = `We can only see a short distance ahead but we can see plenty there that needs to be done`;
+	// const explode = (str) => str.split(/\s+/);
+	// const count = (arr) => arr.length;
+
+  const str = `We can only see a short distance ahead but we can see plenty there that needs to be done`;
+	const explode = (str) => {	//console.log('explode'); 
+															return str.split(/\s+/);}
+	const count = (arr) => {		//console.log('count:' + arr.length); 
+															return arr.length;}
+	
 	const countWords = R.compose(count, explode);
+
 	assert.equal(countWords(str), 19); //-> 19	
+
 });
 
 
@@ -110,8 +131,10 @@ QUnit.test("Composition with functional libraries", function () {
 	// Given data: 
 	let students = ['Rosser', 'Turing', 'Kleene', 'Church'];
 	let grades = [80, 100, 90, 99];
+	let upper = s => s.toUpperCase();
 
 	const smartestStudent = R.compose(
+		upper,
 		R.head,
 		R.pluck(0),
 		R.reverse,
@@ -119,8 +142,10 @@ QUnit.test("Composition with functional libraries", function () {
 		R.zip);
 
 	let result = smartestStudent(students, grades); //-> 'Turing'
-	assert.equal(result, 'Turing');
+	//assert.equal(result, 'Turing');
+	assert.equal(result, 'TURING'); // WHEN 'upper' added
 });
+
 
 QUnit.test("Composition as point-free functions", function () {
 	// Given data: 
@@ -176,7 +201,7 @@ QUnit.test("Show student program with currying and composition", function () {
 	assert.equal(result, '444-44-4444, Alonzo, Church')
 });
 
-
+/*
 QUnit.test("More point-free coding", function () {
 	const runProgram = R.pipe(
 		R.map(R.toLower),
@@ -187,12 +212,4 @@ QUnit.test("More point-free coding", function () {
 	assert.deepEqual(result, ['curry', 'functional', 'memoization', 'partial', 'programming']);
 	//-> [curry, functional, memoization, partial, programming]	
 });
-
-
-
-
-
-
-
-
-
+*/
