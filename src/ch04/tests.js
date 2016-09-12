@@ -170,7 +170,8 @@ QUnit.test("Show student program with currying and composition", function () {
 	const find = R.curry((db, id) => db.find(id));
 
 	// findObject :: DB -> String -> Object
-	const findObject = R.curry(function (db, id) {		
+	const findObject = R.curry(function (db, id) {
+		console.log('id:' + id);		
 		const obj = find(db, id);
 		if(obj === null) {
 			throw new Error(`Object with ID [${id}] not found`);
@@ -201,15 +202,54 @@ QUnit.test("Show student program with currying and composition", function () {
 	assert.equal(result, '444-44-4444, Alonzo, Church')
 });
 
-/*
+
 QUnit.test("More point-free coding", function () {
 	const runProgram = R.pipe(
 		R.map(R.toLower),
 		R.uniq,
 		R.sortBy(R.identity));
 	
+
 	let result = runProgram(['Functional', 'Programming', 'Curry', 'Memoization', 'Partial', 'Curry', 'Programming']);
 	assert.deepEqual(result, ['curry', 'functional', 'memoization', 'partial', 'programming']);
-	//-> [curry, functional, memoization, partial, programming]	
+	//-> [curry, functional, memoization, partial, programming]
+
+	// this is an unchained version - don't do this ==> (compare this to the Ramda.js version above)
+	var data = ['Functional', 'Programming', 'Curry', 'Memoization', 'Partial', 'Curry', 'Programming']
+	data = data.map(x => x.toLowerCase());
+	//data = R.uniq(data); // ramda
+	data = _.uniq(data); // lodash
+	var sorting = R.sortBy(R.identity);
+	data = sorting(data);
+
+	//console.log(data);
+	assert.deepEqual(result, ['curry', 'functional', 'memoization', 'partial', 'programming']);
+
+	// mix libs and user definined functions:
+	data = ['Functional  ', '   Progr--amming', 'Curry', '  Memoization', 'Partial  ', 'Curry', 'Programming']
+	const lower = x => x.toLowerCase();
+	var cleanInput = R.pipe(
+		normalize,
+		trim,
+		lower
+	)
+	const appendBash = x => x + '!!'
+	const getId = x => console.log(R.identity);
+	const chained = R.compose(
+			//R.map(getId)
+			R.map(appendBash)
+		,	_.reverse
+		  //sorting
+		,	R.sortBy(R.identity)
+		, _.uniq
+		//, R.map(normalize)
+		//, R.map(trim)
+		//, R.map(lower)
+		, R.map(cleanInput)
+	);
+
+	console.log("*** chained(data) ***");
+  console.log(chained(data));
+
+
 });
-*/

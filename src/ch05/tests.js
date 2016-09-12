@@ -1,6 +1,11 @@
 /**
   Chapter 5 code listings
   Author: Luis Atencio
+
+
+ TO RUN:
+	node 'C:\Sandpit\functional-programming-js\node_modules\qunit\bin\cli.js' -t 'src\ch05\tests.js' -c 'src\ch05\tests.js'
+
 */
 "use strict";
 
@@ -26,6 +31,7 @@ QUnit.test("Simple Wrapper test", function () {
 	const wrappedValue = wrap('Get Functional');
 	assert.equal(wrappedValue.map(R.identity), 'Get Functional'); //-> 'Get Functional'
 });
+
  
 QUnit.test("Simple functor test", function () {
 	const plus = R.curry((a, b) => a + b);
@@ -37,6 +43,8 @@ QUnit.test("Simple functor test", function () {
 
 	assert.equal(two.fmap(plus3).fmap(plus10).map(R.identity), 15); //-> Wrapper(15)
 });
+
+/*
 
 QUnit.test("Simple find with wrapper", function () {
 	// Use helper DB created in chapter 1	
@@ -216,3 +224,4 @@ QUnit.test("Monads as programmable commas", function () {
 
 
 
+*/
