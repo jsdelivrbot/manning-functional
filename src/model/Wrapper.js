@@ -4,6 +4,7 @@ exports.Wrapper = class Wrapper {
 	}
 	// map :: (A -> B) -> A -> B
 	map(f) {
+		//console.log("map(f): " + this._value);
 		return f(this._value);
 	}
 

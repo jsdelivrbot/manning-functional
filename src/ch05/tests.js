@@ -20,16 +20,20 @@ const Wrapper = require('../model/Wrapper.js').Wrapper;
 const wrap = require('../model/Wrapper.js').wrap;
 const empty = require('../model/Empty.js').empty;
 const Maybe = require('../model/monad/Maybe.js').Maybe;
+const Just = require('../model/monad/Maybe.js').Just;
 const Either = require('../model/monad/Either.js').Either;
 
 // Models used
 const Student = require('../model/Student.js').Student;
 const Address = require('../model/Address.js').Address;
 const Person = require('../model/Person.js').Person;
-
+/*
 QUnit.test("Simple Wrapper test", function () {
 	const wrappedValue = wrap('Get Functional');
 	assert.equal(wrappedValue.map(R.identity), 'Get Functional'); //-> 'Get Functional'
+
+	//console.log(wrappedValue.map(log)); // if 'log' fn existed...
+	//console.log(wrappedValue.map(R.toUpper));
 });
 
  
@@ -44,7 +48,7 @@ QUnit.test("Simple functor test", function () {
 	assert.equal(two.fmap(plus3).fmap(plus10).map(R.identity), 15); //-> Wrapper(15)
 });
 
-/*
+
 
 QUnit.test("Simple find with wrapper", function () {
 	// Use helper DB created in chapter 1	
@@ -56,17 +60,37 @@ QUnit.test("Simple find with wrapper", function () {
 		return wrap(find(db, ssn));
 	});
 	
-	const getAddress = (student) => {
+	const getFirstName = (student) => {
 		return wrap(student.fmap(R.prop('firstname')));
 	};
 
-	const studentAddress = R.compose(
-		getAddress,
+	const studentFirstName = R.compose(
+		getFirstName,
 		findStudent(db)
 	);
 
-	assert.deepEqual(studentAddress('444-44-4444'), wrap(wrap('Alonzo')));
+	// double wrapped
+  console.log(studentFirstName('444-44-4444'));
+
+	assert.deepEqual(studentFirstName('444-44-4444'), wrap(wrap('Alonzo')));
+
+	return;
+	// JMC unwrapped 
+	var result = find(db, 'empty');
+	console.log(result); // undefined
+	result = find(db, '444-44-4444');
+	console.log(result); // Person
+
+	//wrapped
+	result = findStudent(db, '444-44-4444');
+	console.log(result); // Wrapped-Person
+	result = findStudent(db, 'empty');
+	console.log(result); // Wrapped-undefined
+
+
+
 });
+
 
 QUnit.test("Simple empty container", function () {
 	
@@ -74,6 +98,10 @@ QUnit.test("Simple empty container", function () {
 	const half = (val) => isEven(val) ? wrap(val / 2) : empty();
 	assert.deepEqual(half(4), wrap(2)); //-> Wrapper(2)
 	assert.deepEqual(half(3), empty()); //-> Empty	
+
+
+	var result = R.flatten([1, 2, [3, 4], 5, [6, [7, 8, [9, [10, 11, [12, 13, 14, 15, [16, 17, 18, 19]]], 20]]]]);
+	console.log(result);
 });
 
 
@@ -82,25 +110,38 @@ QUnit.test("Simple empty container", function () {
 	
 	let result = WrapperMonad.of('Hello Monads!')
 		.map(R.toUpper)
+		.map(R.reverse)
+		.map(R.reverse)
 		.map(R.identity); //-> Wrapper('HELLO MONADS!')
  	
  	assert.deepEqual(result, new WrapperMonad('HELLO MONADS!'));
+
+	 console.log(result.toString());
 });
 
+
 QUnit.test("Simple Maybe Test", function () {	
+
+	// Maybe is basically an
+	// abstract umbrella object for the concrete monadic structures Just and Nothing
+
 	let result = Maybe.of('Hello Maybe!').map(R.toUpper);
  	assert.deepEqual(result, Maybe.of('HELLO MAYBE!'));
+	
+	assert.deepEqual(result, Maybe.just('HELLO MAYBE!'));
+	assert.deepEqual(result, Just.of('HELLO MAYBE!'));
 
 	const Nothing = require('../model/monad/Maybe.js').Nothing;
  	result = Maybe.fromNullable(null);
  	assert.deepEqual(result, new Nothing(null));
+
 });
+
 
 QUnit.test("Maybe to extract a nested property in object graph", function () {	
 
 	let address = new Address('US');
-	let student = new Student('444-44-4444', 'Joe', 'Smith', 
-		'Harvard', 1960, address);
+	let student = new Student('444-44-4444', 'Joe', 'Smith', 'Harvard', 1960, address);
 
 	const getCountry = (student) => student		
 		.map(R.prop('address'))
@@ -108,7 +149,11 @@ QUnit.test("Maybe to extract a nested property in object graph", function () {
 		.getOrElse('Country does not exist!');
 	
 	assert.equal(getCountry(Maybe.fromNullable(student)), address.country);
+
+	console.log(getCountry(Maybe.fromNullable(student)));
+	console.log(address.country);
 });
+
 
 
 QUnit.test("Simple Either monad test", function () {	
@@ -132,13 +177,19 @@ QUnit.test("Simple Either monad test", function () {
 	let result = findStudent('444-44-4444').getOrElse(new Student());
 	assert.deepEqual(result, new Person('444-44-4444', 'Alonzo', 'Church'));
 
+	console.log(result);
+
 	result = findStudent('xxx-xx-xxxx');
+  console.log(result);
+	//return;
 	assert.deepEqual(result, Either.left(`Object not found with ID: xxx-xx-xxxx`));	
 
 	assert.throws(() => {
 		console.log(result.value);
 	}, TypeError);
+
 });
+*/
 
 // Common code used in the next unit tests
 
@@ -170,7 +221,7 @@ const normalize = (str) => str.replace(/\-/g, '');
 const cleanInput = R.compose(normalize, trim);
 
 QUnit.test("Using Either in show Student", function () {	
-
+	console.info("***    Using Either in show Student ... start");
 	const showStudent = (ssn) =>
 		Maybe.fromNullable(ssn)
 			.map(cleanInput)
@@ -182,9 +233,12 @@ QUnit.test("Using Either in show Student", function () {
 
 	let result = showStudent('444-44-4444').getOrElse('Student not found!')
 	assert.equal(result, '444-44-4444,Alonzo,Church');
+	console.info(result);
 
 	result = showStudent('xxx-xx-xxxx').getOrElse('Student not found!');
 	assert.equal(result, 'Student not found!');
+	console.info(result);
+	console.info("    Using Either in show Student ... END  ****");
 });
 
 QUnit.test("Monads as programmable commas", function () {	
@@ -224,4 +278,3 @@ QUnit.test("Monads as programmable commas", function () {
 
 
 
-*/
